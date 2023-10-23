@@ -4,6 +4,7 @@ const app = express();
 const config = require("./config.json");
 const {getAccessToken, verifyUser} = require("./utils/discord");
 const bodyParser = require('body-parser');
+const mongoose = require("mongoose");
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
@@ -60,4 +61,7 @@ app.get("/verify", async (req, res, next) => {
 
 app.listen(9585, () => {
     console.log("API Online")
-})
+});
+
+mongoose.connect(config.mongoURI);
+

@@ -1,6 +1,9 @@
 const axios = require("axios");
 const database = require("./database");
 const config = require("../config.json");
+const User = require("../models/User")
+const {createUserID} = require("./database");
+const {createTokenFromDiscord} = require("./security");
 
 const getAccessToken = (code, local) => new Promise(async (resolve, reject) => {
     const collection = await database.connect(config.mongoURI, "config");
@@ -17,21 +20,35 @@ const getAccessToken = (code, local) => new Promise(async (resolve, reject) => {
     })
 });
 
-const verifyUser = (accessToken) => new Promise(async (resolve, reject) => {
-    const collection = await database.connect(config.mongoURI, "config");
-    const users = await collection.findOne({id: "authed-users"});
-    console.log("Ran with " + accessToken)
+const getUserData = (accessToken) => new Promise(async (resolve, reject) => {
     axios.get("https://discord.com/api/users/@me", {headers: {Authorization: `Bearer ${accessToken}`}}).then((res) => {
-        console.log(res.data.id)
-        if(users.users.indexOf(res.data.id) !== -1){
-            resolve({code: 200, user: res.data})
-        } else {
-            resolve({code: 400, username: res.data.username})
-        }
+        resolve(res.data);
     }).catch((e) => {
         console.log(e)
         reject(e);
     });
 });
 
-module.exports = {getAccessToken, verifyUser}
+const createAccount = (accessToken) => new Promise(async (resolve, reject) => {
+    const userData = await getUserData(accessToken)
+
+    const user = new User({
+        username: userData.username,
+        id: createUserID(config.mongoURI),
+        oauth2_type: "discord",
+        stats: {
+            likes_received: 0,
+            likes_given: 0,
+            posts_created: 0,
+        },
+        avatarURL: `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp?size=160`,
+        admin: false,
+        aboutMe: "",
+        dateJoined: Date.now(),
+        token: createTokenFromDiscord(userData.id)
+    });
+
+    user.save();
+});
+
+module.exports = {getAccessToken}
