@@ -44,9 +44,14 @@ const getUserData = (token, id) => new Promise(async (resolve, reject) => {
     resolve(userData);
 });
 
-const userExists = (username) => new Promise((resolve, reject) => {
-   if(User.findOne({username: username})){ resolve( true)}
-   else {resolve(false)}
+const userExists = (username) => new Promise(async (resolve, reject) => {
+    const user = await User.findOne({username: username})
+
+    if(user) {
+        resolve(true)
+    } else {
+        resolve(false)
+    }
 });
 
 
