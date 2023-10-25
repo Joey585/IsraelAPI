@@ -2,7 +2,7 @@ const axios = require("axios");
 const database = require("./database");
 const config = require("../config.json");
 const User = require("../models/User")
-const {createUserID} = require("./database");
+const {createUserID, userExists} = require("./database");
 const {createTokenFromDiscord} = require("./security");
 
 const getAccessToken = (code, local) => new Promise(async (resolve, reject) => {
@@ -30,11 +30,17 @@ const getUserData = (accessToken) => new Promise(async (resolve, reject) => {
 });
 
 const createAccount = (accessToken) => new Promise(async (resolve, reject) => {
-    const userData = await getUserData(accessToken)
+    const userData = await getUserData(accessToken);
+    const token = createTokenFromDiscord(userData.id);
+
+    if(await userExists(userData.username)){
+        const user = await User.findOne({username: userData.username})
+        return resolve(user.token);
+    }
 
     const user = new User({
         username: userData.username,
-        id: createUserID(config.mongoURI),
+        id: await createUserID(config.mongoURI),
         oauth2_type: "discord",
         stats: {
             likes_received: 0,
@@ -45,10 +51,14 @@ const createAccount = (accessToken) => new Promise(async (resolve, reject) => {
         admin: false,
         aboutMe: "",
         dateJoined: Date.now(),
-        token: createTokenFromDiscord(userData.id)
+        token: token
     });
 
-    user.save();
+    user.save().then(() => {
+        resolve(token)
+    }).catch((e) => {
+        reject(e);
+    })
 });
 
-module.exports = {getAccessToken}
+module.exports = {getAccessToken, createAccount}

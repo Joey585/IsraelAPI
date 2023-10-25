@@ -2,14 +2,29 @@ const express = require("express");
 const database = require("./utils/database");
 const app = express();
 const config = require("./config.json");
-const {getAccessToken, verifyUser} = require("./utils/discord");
+const {getAccessToken, verifyUser, createAccount} = require("./utils/discord");
 const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
+const {validToken} = require("./utils/security");
+const {getUserData} = require("./utils/database");
+const cors = require("cors")
+
+async function checkUser(req, res, next) {
+    const nonSecurePaths = ['/', '/oauth2', '/auth', '/verify'];
+    if(nonSecurePaths.includes(req.path)) return next();
+
+    if(!req.get("Authorization")) return res.status(403).json({error: "No token"});
+    if(!await validToken(req.get("Authorization"))) return res.status(403).json({error: "Token is invalid"});
+    next();
+}
 
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true
 }));
+app.use(cors());
+app.options("*", cors())
+app.all("*", checkUser);
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -52,11 +67,22 @@ app.get("/verify", async (req, res, next) => {
 
    if(!accessToken) return res.sendStatus(400);
 
-   verifyUser(accessToken).then((data) => {
-        res.json(data)
+   createAccount(accessToken).then((token) => {
+      res.json({code: 200, token: token});
    }).catch((e) => {
-        next(e)
-   })
+       next(e);
+   });
+});
+
+app.get("/user", async (req, res, next) => {
+    if(!req.query.id) return;
+    const token = req.get("Authorization");
+
+    getUserData(token, req.query.id).then((data) => {
+        res.json(data);
+    }).catch((e) => {
+        next(e);
+    })
 });
 
 app.listen(9585, () => {

@@ -3,7 +3,7 @@ const {Schema, model} = require("mongoose");
 const userSchema = new Schema({
     username: String,
     id: String,
-    oauth2_type: "discord" | "google" | "null",
+    oauth2_type: String,
     stats: {
         likes_received: Number,
         likes_given: Number,
@@ -17,4 +17,5 @@ const userSchema = new Schema({
 });
 
 const User = model("User", userSchema);
-export default User;
+
+module.exports = User
