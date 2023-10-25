@@ -37,8 +37,13 @@ const getUserData = (token, id) => new Promise(async (resolve, reject) => {
                 avatarURL: rawData.avatarURL,
                 aboutMe: rawData.aboutMe,
                 dateJoined: rawData.dateJoined,
+                isEditable: false
             }
             break;
+    }
+
+    if(rawData.token === token){
+        userData.isEditable = true;
     }
 
     resolve(userData);

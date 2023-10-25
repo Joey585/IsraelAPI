@@ -32,15 +32,16 @@ const getUserData = (accessToken) => new Promise(async (resolve, reject) => {
 const createAccount = (accessToken) => new Promise(async (resolve, reject) => {
     const userData = await getUserData(accessToken);
     const token = createTokenFromDiscord(userData.id);
+    const id = await createUserID(config.mongoURI)
 
     if(await userExists(userData.username)){
         const user = await User.findOne({username: userData.username})
-        return resolve(user.token);
+        return resolve({token: user.token, id: user.id});
     }
 
     const user = new User({
         username: userData.username,
-        id: await createUserID(config.mongoURI),
+        id: id,
         oauth2_type: "discord",
         stats: {
             likes_received: 0,
@@ -55,7 +56,7 @@ const createAccount = (accessToken) => new Promise(async (resolve, reject) => {
     });
 
     user.save().then(() => {
-        resolve(token)
+        resolve({token: token, id: userData.id})
     }).catch((e) => {
         reject(e);
     })

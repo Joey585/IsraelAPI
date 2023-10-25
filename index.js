@@ -67,8 +67,8 @@ app.get("/verify", async (req, res, next) => {
 
    if(!accessToken) return res.sendStatus(400);
 
-   createAccount(accessToken).then((token) => {
-      res.json({code: 200, token: token});
+   createAccount(accessToken).then((data) => {
+      res.json({code: 200, d: data});
    }).catch((e) => {
        next(e);
    });
