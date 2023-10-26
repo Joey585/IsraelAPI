@@ -5,7 +5,7 @@ It is structured behind the expressjs framework
 ## Endpoints
 
 - **GET** /oauth2
-Recieves the oauth2 link for discord based on your development enviroment (local or external)
+Receives the oauth2 link for discord based on your development enviroment (local or external)
 
 - **POST** /auth
 Gets the discord user access code based on the initial code supplied from discord and sends it back to the client

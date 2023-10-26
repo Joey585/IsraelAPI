@@ -59,5 +59,17 @@ const userExists = (username) => new Promise(async (resolve, reject) => {
     }
 });
 
+const editUserData = (token, id, data) => new Promise(async (resolve, reject) => {
+    const user = await User.findOne({id: id});
 
-module.exports = { connect, createUserID, getUserData, userExists }
+    if(user.token !== token) reject(400);
+
+    for(const key in data){
+        await user.set(`${key}`, data[key]);
+    }
+    await user.save();
+    resolve(200)
+});
+
+
+module.exports = { connect, createUserID, getUserData, userExists, editUserData }

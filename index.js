@@ -6,7 +6,7 @@ const {getAccessToken, verifyUser, createAccount} = require("./utils/discord");
 const bodyParser = require('body-parser');
 const mongoose = require("mongoose");
 const {validToken} = require("./utils/security");
-const {getUserData} = require("./utils/database");
+const {getUserData, editUserData} = require("./utils/database");
 const cors = require("cors")
 
 async function checkUser(req, res, next) {
@@ -80,6 +80,20 @@ app.get("/user", async (req, res, next) => {
 
     getUserData(token, req.query.id).then((data) => {
         res.json(data);
+    }).catch((e) => {
+        next(e);
+    })
+});
+
+app.post("/edit-user", (req, res, next) => {
+   const id = req.body.id;
+   const data = req.body.d;
+   const token = req.get("Authorization");
+
+   if(!data || !id) next(400);
+
+    editUserData(token, id, data).then((r) => {
+        res.json(r);
     }).catch((e) => {
         next(e);
     })
