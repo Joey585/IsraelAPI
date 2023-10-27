@@ -96,7 +96,7 @@ app.post("/edit-user", (req, res, next) => {
         res.json(r);
     }).catch((e) => {
         next(e);
-    })
+    });
 });
 
 app.listen(9585, () => {

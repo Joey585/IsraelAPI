@@ -65,7 +65,13 @@ const editUserData = (token, id, data) => new Promise(async (resolve, reject) =>
     if(user.token !== token) reject(400);
 
     for(const key in data){
-        await user.set(`${key}`, data[key]);
+        if(key === "username"){
+            const exists = await userExists(data[key])
+            if(!exists) await user.set(`${key}`, data[key]);
+
+        } else {
+            await user.set(`${key}`, data[key]);
+        }
     }
     await user.save();
     resolve(200)
