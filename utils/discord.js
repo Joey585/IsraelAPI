@@ -45,6 +45,8 @@ const createAccount = (accessToken) => new Promise(async (resolve, reject) => {
         oauth2_type: "discord",
         stats: {
             likes_received: 0,
+            followers: 0,
+            following: 0,
             likes_given: 0,
             posts_created: 0,
         },

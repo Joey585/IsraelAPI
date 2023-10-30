@@ -34,6 +34,10 @@ const getUserData = (token, id) => new Promise(async (resolve, reject) => {
             userData = {
                 username: rawData.username,
                 id: rawData.id,
+                stats: {
+                    followers: rawData.stats.followers,
+                    following: rawData.stats.following,
+                },
                 avatarURL: rawData.avatarURL,
                 aboutMe: rawData.aboutMe,
                 dateJoined: rawData.dateJoined,

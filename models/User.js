@@ -6,6 +6,8 @@ const userSchema = new Schema({
     oauth2_type: String,
     stats: {
         likes_received: Number,
+        followers: Number,
+        following: Number,
         likes_given: Number,
         posts_created: Number,
     },
